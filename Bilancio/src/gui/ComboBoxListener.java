@@ -10,35 +10,37 @@ import javax.swing.JTable;
 import javax.swing.table.TableRowSorter;
 
 /**
- * Listener della JComboBox nella MainWindow
+ * Listener of the JComboBox in the MainWindow
  * @author Mirco Romagnoli
- *
+ * @see JComboBox
+ * @see ActionListener
  */
 public class ComboBoxListener implements ActionListener {
-	/** Tabella contenuta nella MainWindow */
+	/**
+	 * Table in the MainWindow
+	 */
 	private JTable table;
 
 	/**
-	 * Costruttore della classe
-	 * @param table tabella che dovra' essere filtrata
+	 * Constructor of the class
+	 * @param table Table to filter
 	 */
 	public ComboBoxListener(JTable table) {
 		this.table = table ;
 	}
 	
 	/**
-	 * Imposta o rimuove un filtro alla tabella basato sulla scelta dell'utente
-	 * <br>
-	 * Se la scelta e' "Seleziona periodo" fa apparire una DateDialog per permettere
-	 * all'utente di selezionare un periodo arbitrario di tempo da filtrare
+	 * Sets or remove a filter in the table based on the user's choice<br>
+	 * If the choice is "Seleziona periodo" a DateDialog appears to le the users
+	 * set an arbitrary filter
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		JComboBox<String> src =(JComboBox<String>) e.getSource();
 		String source = (String)src.getSelectedItem();
-		Calendar calendar = Calendar.getInstance(); // Caricamento della data attuale
+		Calendar calendar = Calendar.getInstance(); // Loading today's date
 		Date actualDate = calendar.getTime() ;
-		// Sottrazione di un periodo a seconda della scelta dell'utente
+		// Subtraction of an amount of time based on the user's choice
 		if (source.equals("Giorno"))
 			calendar.add(Calendar.DAY_OF_MONTH, -1);
 		else if (source.equals("Settimana"))
@@ -51,18 +53,18 @@ public class ComboBoxListener implements ActionListener {
 			DateDialog dialog = new DateDialog("Seleziona un periodo di tempo", table);
 			dialog.setVisible(true);
 			return ;
-		}
-		else { // Se si sceglie di vedere tutti i dati della tabella il filtro viene tolto
-			((TableRowSorter<BilancioTableModel>) table.getRowSorter()).setRowFilter(null);
-			((BilancioTableModel)table.getModel()).fireTableDataChanged();
+		} 
+		else { // If the user choose to see every data of the table the filter is removed
+			((TableRowSorter<BalanceTableModel>) table.getRowSorter()).setRowFilter(null);
+			((BalanceTableModel)table.getModel()).fireTableDataChanged();
 			return ;
 		}
-		// Inserimento del filtro
-		DateRowFilter<BilancioTableModel, Integer> filter = new DateRowFilter<>(calendar.getTime(), actualDate);
-		TableRowSorter<BilancioTableModel> sorter = (TableRowSorter<BilancioTableModel>) table.getRowSorter();
+		// Setting the filter
+		DateRowFilter<BalanceTableModel, Integer> filter = new DateRowFilter<>(calendar.getTime(), actualDate);
+		TableRowSorter<BalanceTableModel> sorter = (TableRowSorter<BalanceTableModel>) table.getRowSorter();
 		sorter.setRowFilter(filter);
 		table.setRowSorter(sorter);
-		((BilancioTableModel)table.getModel()).fireTableDataChanged();
+		((BalanceTableModel)table.getModel()).fireTableDataChanged();
 	}
 
 }

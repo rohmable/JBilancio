@@ -1,10 +1,14 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import javax.swing.JButton;
@@ -12,9 +16,10 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import bilancio.Entrata;
-import bilancio.Uscita;
-import bilancio.Voce;
+import bilancio.Revenue;
+import bilancio.StringDate;
+import bilancio.Loss;
+import bilancio.Voice;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
@@ -27,69 +32,75 @@ import java.awt.Dimension;
 import javax.swing.JRadioButton;
 
 /**
- * Dialogo che permette di aggiungere una voce al bilancio.
- * <p>
- * Il dialogo contiene due spinner - uno per la data ed uno per l'ammontare - e una casella
- * di testo per inserire la descrizione
+ * Dialog window to add a new voice to the balance<br>
+ * The dialog contains two spinners - one for the date and one for the amount - and a
+ * text field to insert the description
+ * @version {@value #serialVersionUID}
  * @author Mirco Romagnoli
- *
+ * @see JDialog
+ * @see ActionListener
  */
-public class AddVoice extends JDialog implements ActionListener {
+public class AddVoice extends JDialog implements ActionListener, FocusListener {
 
 	/**
-	 * Versione della classe
+	 * Version of the class
 	 */
 	private static final long serialVersionUID = 1L;
 
-	/** Spinner contenente la data */
+	/** Spinner for the date */
 	private JSpinner dateSpinner ;
-	/** Spinner contenente l'ammontare della Voce */
+	/** Spinner for the amount */
 	private JSpinner ammSpinner ;
-	/** Campo di testo contenente la descrizione della Voce */
+	/** Text field for the description */
 	private JTextField txtpnDescription ;
-	/** Radio button per impostare la voce come entrata */
-	private JRadioButton rdbtnEntrata ;
-	/** Radio button per impostare la voce come uscita */
-	private JRadioButton rdbtnUscita ;
+	/** Radio button to set the voice as a revenue */
+	private JRadioButton rdbtnRevenue ;
+	/** Radio button to set the voice as a loss */
+	private JRadioButton rdbtnLoss ;
+	/**
+	 * Boolean used to see if the text inside txtpnDescription is
+	 * the hint or the user's description
+	 */
+	private boolean firstWrite ;
 
 	/**
-	 * Crea una finestra di dialogo non modale, con un owner ed un titolo specificati
-	 * <br>
-	 * L'owner non puo' essere {@code null}
-	 * @param owner
-	 * @param title
+	 * Builds a non modal dialog window, with specified owner and title<br>
+	 * The owner can't be {@code null}
+	 * @param parent Owner of the dialog
+	 * @param title Title of the dialog
 	 */
-	public AddVoice(Frame owner, String title) {
-		// Creazione del dialogo
-		super(owner, title);
+	public AddVoice(Frame parent, String title) {
+		// Dialog creation
+		super(parent, title);
 		setModal(true);
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		firstWrite = true ;
 		
-		// Creazione del pannello che conterra' tutti gli elementi
+		// Creation of the panel that will contain every element
 		JPanel contentPanel = new JPanel();
 		setBounds(100, 100, 450, 300);
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel);
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 		
-		// Creazione del pannello che conterra' lo spinner della data
+		// Creation of the panel that will contain the date spinner
 		JPanel datePanel = new JPanel();
 		FlowLayout flowLayout_1 = (FlowLayout) datePanel.getLayout();
-		flowLayout_1.setAlignment(FlowLayout.LEADING); // Gli elementi verranno allineati a sinistra
+		flowLayout_1.setAlignment(FlowLayout.LEADING); // The elements will be left-aligned
 		contentPanel.add(datePanel);
 		JLabel lblData = new JLabel("Data");
 		datePanel.add(lblData);
 		dateSpinner = new JSpinner();
-		Calendar calendar = Calendar.getInstance(); // Caricamento della data odierna
+		Calendar calendar = Calendar.getInstance(); // Loading of today's date
 		SpinnerDateModel dateModel = new SpinnerDateModel(calendar.getTime(), null, null, Calendar.DATE);
 		dateSpinner.setModel(dateModel);
 		dateSpinner.setEditor(new JSpinner.DateEditor(dateSpinner, "dd/MM/yyyy"));
 		datePanel.add(dateSpinner);
 		
-		// Creazione del pannello che conterra' lo spinner dell' ammontare
+		// Creation of the panel that will contain the amount spinner
 		JPanel amountPanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) amountPanel.getLayout();
-		flowLayout.setAlignment(FlowLayout.LEADING); // Gli elementi verranno allineati a sinistra
+		flowLayout.setAlignment(FlowLayout.LEADING); // The elements will be left-aligned
 		contentPanel.add(amountPanel);
 		JLabel lblAmmontare = new JLabel("Ammontare");
 		amountPanel.add(lblAmmontare);
@@ -98,24 +109,26 @@ public class AddVoice extends JDialog implements ActionListener {
 		SpinnerNumberModel ammModel = new SpinnerNumberModel(0.0, 0.0, null, 0.01);
 		ammSpinner.setModel(ammModel);
 		amountPanel.add(ammSpinner);
-		// Aggiunta dei bottoni all'amountPanel per impostare entrata o uscita
-		rdbtnEntrata = new JRadioButton("Entrata"); 
-		amountPanel.add(rdbtnEntrata);				
-		rdbtnUscita = new JRadioButton("Uscita");	
-		amountPanel.add(rdbtnUscita);				
+		// Adding the buttons to the amountPanel to set the revenue or the loss
+		rdbtnRevenue = new JRadioButton("Entrata"); 
+		amountPanel.add(rdbtnRevenue);				
+		rdbtnLoss = new JRadioButton("Uscita");	
+		amountPanel.add(rdbtnLoss);				
 		ButtonGroup group = new ButtonGroup();
-		group.add(rdbtnEntrata);
-		group.add(rdbtnUscita);
-		rdbtnEntrata.setSelected(true);
+		group.add(rdbtnRevenue);
+		group.add(rdbtnLoss);
+		rdbtnRevenue.setSelected(true);
 		
-		// Creazione del pannello che conterra' la descrizione
+		// Creation of the panel that will contain the description
 		JPanel descriptionPanel = new JPanel();
 		contentPanel.add(descriptionPanel);
 		txtpnDescription = new JTextField(30);
+		txtpnDescription.setForeground(Color.lightGray);
 		txtpnDescription.setText("Descrizione");
 		descriptionPanel.add(txtpnDescription);
+		txtpnDescription.addFocusListener(this);
 		
-		// Pannello che conterra' i bottoni per controllare la finestra di dialogo
+		// Panel that will contain the buttons to control the dialog window
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);
@@ -124,33 +137,62 @@ public class AddVoice extends JDialog implements ActionListener {
 		getRootPane().setDefaultButton(okButton);
 		JButton cancelButton = new JButton("Cancel");
 		buttonPane.add(cancelButton);
-		// Aggiunta degli ActionListener
+		// Adding ActionListeners
 		okButton.addActionListener(this);
 		cancelButton.addActionListener(this);
 		pack();
+		setLocationRelativeTo(parent);
 	}
 
 	/**
-	 * Action listener dei bottoni della finestra di dialogo
-	 * @param e evento lanciato dal click sui bottoni
+	 * Button's ActionListener of the dialog window
+	 * @param e Event thrown by clicking the buttons
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		String aCommand = e.getActionCommand();
-		if (aCommand.equals("OK")) {
-			Date selectedDate = (Date) dateSpinner.getValue() ;
+		String src = e.getActionCommand();
+		if (src.equals("OK")) {
+			StringDate selectedDate ;
+			try {
+				selectedDate = new StringDate((Date)dateSpinner.getValue());
+			} catch (ParseException e1) {
+				return ;
+			}
 			double amount = (double)ammSpinner.getValue() ;
 			String desc = txtpnDescription.getText();
-			Voce nuovaVoce ;
-			if (rdbtnEntrata.isSelected())
-				nuovaVoce = new Entrata(selectedDate, amount, desc) ;
+			Voice newVoice ;
+			if (rdbtnRevenue.isSelected())
+				newVoice = new Revenue(selectedDate, amount, desc) ;
 			else
-				nuovaVoce = new Uscita(selectedDate, amount, desc) ;
+				newVoice = new Loss(selectedDate, amount, desc) ;
 			MainWindow owner = (MainWindow) getOwner();
-			owner.getBilancio().add(nuovaVoce);
+			owner.getBilancio().add(newVoice);
 			owner.getTableModel().fireTableDataChanged();
 		}
 		setVisible(false);
+	}
+
+	/**
+	 * Listener used to display a "gray hint" to the user, when the text field
+	 * gets the focus it sets the text to an empty string and sets the foreground
+	 * to black
+	 */
+	@Override
+	public void focusGained(FocusEvent e) {
+		if (firstWrite) {
+			txtpnDescription.setText("");
+			txtpnDescription.setForeground(Color.black);
+			firstWrite = false ;
+		}
+		
+	}
+
+	/**
+	 * Unused listener
+	 */
+	@Override
+	public void focusLost(FocusEvent e) {
+		
 	}
 	
 	

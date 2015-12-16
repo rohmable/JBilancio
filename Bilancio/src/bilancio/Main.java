@@ -7,21 +7,21 @@ import javax.swing.*;
 import gui.* ;
 
 /**
- * Questa classe fa partire il programma creando una WelcomeScreen e rendendola visibile
+ * Starts the program creating and setting visible a {@code WelcomeScreen}
  * @author Mirco Romagnoli
- *
+ * @see WelcomeScreen
  */
 public class Main {
 	
 	/**
-	 * Impedisce l'istanzazione di un oggetto di questa classe
+	 * Prevents the instantiation of an object of this class
 	 */
 	public Main() {
 	}
 
 	/**
-	 * Main del programma, imposta il look & feel a quello del sistema e crea una WelcomeScreen
-	 * @param args argomenti della funzione main (non utilizzati)
+	 * Main of the application, sets the system's look and feel and creates a WelcomeScreen
+	 * @param args Arguments of the main function (unused)
 	 * @see WelcomeScreen
 	 */
 	public static void main(String[] args) {

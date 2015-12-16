@@ -2,7 +2,7 @@ package gui;
 
 import java.awt.Color;
 import java.text.DecimalFormat;
-import java.util.Date;
+import java.text.ParseException;
 import java.util.Vector;
 
 import javax.swing.JLabel;
@@ -12,35 +12,42 @@ import javax.swing.table.AbstractTableModel;
 import bilancio.*;
 
 /**
- * Table model che gestisce un archivio di Voci
+ * Table model that displays an archive of Voices on a JTable
  * @author Mirco Romagnoli
- *
+ * @version {@value #serialVersionUID}
+ * @see AbstractTableModel
  */
-public class BilancioTableModel extends AbstractTableModel {
+public class BalanceTableModel extends AbstractTableModel {
 	/**
-	 * Versione della classe
+	 * Version of the class
 	 */
 	private static final long serialVersionUID = 1L;
-	/** Archivio delle voci da mostrare nella JTable */
-	private Archivio<Voce> voci ;
+	/**
+	 * Archive of the voices to display on the JTable
+	 */
+	private Archive<Voice> balance ;
 	/** 
-	 * JLabel che viene aggiornata con la somma algebrica dei valori di entrata/uscita delle
-	 * righe della tabella
+	 * JLabel updated with the algebraic sum of the values of revenue/loss
+	 * in the table
 	 */
 	private JLabel lblTotale ;
-	/** Tabella a cui e' associato il modello */
+	/**
+	 * Table associated to the model 
+	 */
 	private JTable table ;
-	/** Nomi delle colonne */
+	/**
+	 * Column names
+	 */
 	private final String[] columns = {"Ammontare", "Data", "Descrizione"} ;
 	
 	/** 
-	 * Costruttore del BilancioTableModel
-	 * @param voci archivio delle voci del bilancio
-	 * @param lblTotale JLabel che contiene il totale dei valori di entrata/uscita delle righe della tabella
-	 * @param table tabella a cui e' associato il modello
+	 * Constructor of the BalanceTableModel
+	 * @param balance Archive of the balance
+	 * @param lblTotale JLabel that contains the sum of the balance sum
+	 * @param table Table associated to the model
 	 */
-	public BilancioTableModel(Archivio<Voce> voci, JLabel lblTotale, JTable table) {
-		this.voci = voci ;
+	public BalanceTableModel(Archive<Voice> balance, JLabel lblTotale, JTable table) {
+		this.balance = balance ;
 		this.lblTotale = lblTotale ;
 		this.table = table ;
 	}
@@ -57,7 +64,7 @@ public class BilancioTableModel extends AbstractTableModel {
 
 	@Override
 	public int getRowCount() {
-		return voci.size();
+		return balance.size();
 	}
 	
 	@Override
@@ -67,21 +74,24 @@ public class BilancioTableModel extends AbstractTableModel {
 	
 	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-		Voce v = voci.get(rowIndex) ;
+		Voice v = balance.get(rowIndex) ;
 		switch (columnIndex) {
 		case 0:
 			Double newVal = (Double)aValue;
-			if (v instanceof Entrata && Double.compare(newVal, 0) < 0 )
+			if (Double.compare(newVal, 0) < 0)
 				return ;
-			if (v instanceof Uscita && Double.compare(newVal, 0) >= 0)
-				return ;
-			v.setAmm((Double)aValue);
+			else
+				v.setAmount((Double)aValue);
 			break;
 		case 1:
-			v.setData((Date) aValue);
+			try {
+				v.setDate((String) aValue);
+			} catch (ParseException e) {
+				
+			}
 			break ;
 		case 2:
-			v.setDescrizione((String) aValue);
+			v.setDescription((String) aValue);
 			break ;
 		default:
 			break;
@@ -95,7 +105,7 @@ public class BilancioTableModel extends AbstractTableModel {
 		case 0:
 			return Double.class ;
 		case 1:
-			return Date.class ;
+			return String.class ;
 		case 2:
 			return String.class;
 		default:
@@ -104,17 +114,15 @@ public class BilancioTableModel extends AbstractTableModel {
 	}
 	
 	/**
-	 * Notifica che la tabella e' stata modificata e che deve essere ridisegnata
-	 * <br>
-	 * Inoltre viene anche aggiornata la lblTotale che conterra' la somma degli elementi
-	 * visibili nella tabella
+	 * Notifies that the table has been edited and must be repainted<br>
+	 * The lblTotale will be updated with the sum of the visible rows in the table
 	 */
 	@Override
 	public void fireTableDataChanged() {
 		super.fireTableDataChanged();
 		double tot = 0 ;
 		for (int i = 0 ; i < table.getRowCount(); i++)
-			tot += voci.get(table.convertRowIndexToModel(i)).getAmm();
+			tot += balance.get(table.convertRowIndexToModel(i)).getAmount();
 		if (tot >= 0)
 			lblTotale.setForeground(Color.GREEN);
 		else
@@ -124,37 +132,36 @@ public class BilancioTableModel extends AbstractTableModel {
 	}
 	
 	/**
-	 * @return l'archivio contenuto nel model
+	 * @return Archive contained in the model
 	 */
-	public Archivio<Voce> getData() {
-		return voci ;
+	public Archive<Voice> getData() {
+		return balance ;
 	}
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		Voce v = voci.get(rowIndex) ;
+		Voice v = balance.get(rowIndex) ;
 		switch(columnIndex) {
 		case 0:
-			return v.getAmm() ;
+			return v.getAmount() ;
 		case 1:
-			return v.getData() ;
+			return v.getDate().toString() ;
 		case 2:
-			return v.getDescrizione() ;
+			return v.getDescription() ;
 		default:
 			return null ;
 		}
 	}
 	
 	/**
-	 * Ricerca le occorrenze e le inserisce in un vettore
-	 * @param occurence stringa da ricercare
-	 * @return un vettore contenente gli indici dell'archivio in cui sono contenute le occorrenze
-	 * della stringa cercata
+	 * Searches for occurrences and inserts their index in a vector
+	 * @param occurence String to search
+	 * @return A Vector containing the indexes of the found occurrences
 	 */
 	public Vector<Integer> searchOccurence(String occurence) {
 		Vector<Integer> indexes = new Vector<>();
 		int index = 0 ;
-		for (int i = 0 ; i < voci.size() ; i++){
+		for (int i = 0 ; i < balance.size() ; i++){
 			if (getValueAt(i, 0).toString().contains(occurence)){
 				indexes.insertElementAt(i, index);
 				index++ ;
