@@ -13,7 +13,7 @@ public class Loss extends Voice implements Serializable {
 	/**
 	 * Version of the class
 	 */
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 3L;
 
 	/**
 	 * Instantiates a loss
@@ -23,5 +23,10 @@ public class Loss extends Voice implements Serializable {
 	 */
 	public Loss(StringDate date, double amount, String description) {
 		super(date, description, amount) ;
+	}
+	
+	@Override
+	public String toString() {
+		return '-' + String.valueOf(getAmount()) ;
 	}
 }

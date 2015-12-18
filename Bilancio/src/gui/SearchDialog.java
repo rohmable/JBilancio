@@ -113,8 +113,10 @@ public class SearchDialog extends JDialog implements ActionListener, DocumentLis
 				lastOccurence++ ;
 			}
 		}
-		else
+		else {
+			table.clearSelection();
 			setVisible(false);
+		}
 	}
 
 	/**

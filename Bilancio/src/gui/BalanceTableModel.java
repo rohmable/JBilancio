@@ -21,7 +21,7 @@ public class BalanceTableModel extends AbstractTableModel {
 	/**
 	 * Version of the class
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 	/**
 	 * Archive of the voices to display on the JTable
 	 */
@@ -176,5 +176,9 @@ public class BalanceTableModel extends AbstractTableModel {
 			}
 		}
 		return indexes ;
+	}
+	
+	public java.lang.Class<?> getRowClass (int row) {
+		return balance.get(row).getClass();
 	}
 }

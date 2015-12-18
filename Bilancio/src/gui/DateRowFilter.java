@@ -1,8 +1,13 @@
 package gui;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.swing.RowFilter;
+
+import bilancio.StringDate;
 
 /**
  * Filter that extends a RowFilter, it is used to filter a table to let see
@@ -34,7 +39,14 @@ public class DateRowFilter<M, I> extends RowFilter<M, I> {
 	 */
 	@Override
 	public boolean include(javax.swing.RowFilter.Entry<? extends M, ? extends I> entry) {
-	    Date entryDate = (Date) entry.getValue(1);
+	    String entryStringDate = (String) entry.getValue(1);
+	    DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+	    Date entryDate = null ;
+	    try {
+			entryDate = formatter.parse(entryStringDate);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 	    if (entryDate.after(minimumDate) && entryDate.before(maximumDate))
 	    	return true ;
 	    else

@@ -180,7 +180,7 @@ public class MainWindow extends JFrame implements ActionListener {
 						"Conferma", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, 
 						null, options, options[1]) ;
 				if (response == JOptionPane.YES_OPTION) {
-					balance.remove(index);
+					balance.remove(table.convertRowIndexToModel(index));
 					tableModel.fireTableDataChanged();
 				}
 			}

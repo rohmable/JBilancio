@@ -1,5 +1,6 @@
 package bilancio;
 
+import java.awt.image.MultiPixelPackedSampleModel;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -10,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.attribute.UserDefinedFileAttributeView;
 import org.jopendocument.dom.spreadsheet.SpreadSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.formula.functions.Column;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.WorkbookUtil;
 
@@ -53,11 +55,11 @@ public abstract class TableExporter {
 		}
 		
 		// Table creation
-		for (int i = 0 ; i < model.getRowCount() ; i++) {
+		for (int i = 0 ; i < table.getRowCount() ; i++) {
 			Row row = bal.createRow(i+1);
-			for (int j = 0 ; j < model.getColumnCount() ; j++) {
+			for (int j = 0 ; j < table.getColumnCount() ; j++) {
 				Cell cell = row.createCell(j);
-				cell.setCellValue(model.getValueAt(i, j).toString());
+				cell.setCellValue(model.getValueAt(table.convertRowIndexToModel(i), j).toString());
 			}
 		}
 		
