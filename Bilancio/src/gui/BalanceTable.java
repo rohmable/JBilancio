@@ -1,181 +1,143 @@
 package gui;
 
-import java.awt.Color;
-import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.util.Vector;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.attribute.UserDefinedFileAttributeView;
 
-import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
-import bilancio.*;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.WorkbookUtil;
+import org.jopendocument.dom.spreadsheet.SpreadSheet;
 
 /**
- * Table model that displays an archive of Voices on a JTable
+ * Table hh
  * @author Mirco Romagnoli
- * @version {@value #serialVersionUID}
- * @see AbstractTableModel
+ *
  */
-public class BalanceTableModel extends AbstractTableModel {
+public class BalanceTable extends JTable {
 	/**
-	 * Version of the class
+	 * Class version
 	 */
 	private static final long serialVersionUID = 1L;
-	/**
-	 * Archive of the voices to display on the JTable
-	 */
-	private Archive<Voice> balance ;
-	/** 
-	 * JLabel updated with the algebraic sum of the values of revenue/loss
-	 * in the table
-	 */
-	private JLabel lblTotale ;
-	/**
-	 * Table associated to the model 
-	 */
-	private JTable table ;
-	/**
-	 * Column names
-	 */
-	private final String[] columns = {"Ammontare", "Data", "Descrizione"} ;
-	/**
-	 * Columns indexes
-	 */
-	private final int AMOUNT_COLUMN = 0, DATE_COLUMN = 1, DESC_COLUMN = 2 ;
 	
-	/** 
-	 * Constructor of the BalanceTableModel
-	 * @param balance Archive of the balance
-	 * @param lblTotale JLabel that contains the sum of the balance sum
-	 * @param table Table associated to the model
-	 */
-	public BalanceTableModel(Archive<Voice> balance, JLabel lblTotale, JTable table) {
-		this.balance = balance ;
-		this.lblTotale = lblTotale ;
-		this.table = table ;
-	}
-
-	@Override
-	public String getColumnName(int column)  {
-		return columns[column] ;
+	public BalanceTable() {
+		super();
 	}
 	
-	@Override
-	public int getColumnCount() {
-		return columns.length;
-	}
-
-	@Override
-	public int getRowCount() {
-		return balance.size();
+	public BalanceTable(TableModel tableModel) {
+		super(tableModel);
 	}
 	
-	@Override
-	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return true ;
-	}
-	
-	@Override
-	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-		String newValue = (String)aValue; 
-		Voice v = balance.get(rowIndex) ;
-		switch (columnIndex) {
-		case AMOUNT_COLUMN:
-			Double newVal = Double.parseDouble(newValue);
-			if (Double.compare(newVal, 0) < 0)
-				return ;
-			else
-				v.setAmount(Double.parseDouble(newValue));
-			break;
-		case DATE_COLUMN:
-			try {
-				v.setDate(newValue);
-			} catch (ParseException e) {
-				
-			}
-			break ;
-		case DESC_COLUMN:
-			v.setDescription(newValue);
-			break ;
-		default:
-			break;
+	/**
+	 * Exports the table in the .xls format<br>
+	 * <a href="http://poi.apache.org/">Apache POI</a> libraries are used to export the	
+	 * table as an Excel document
+	 * @param file File to write
+	 * @throws IOException Thrown by the FileOutputStream if something at the moment of his
+	 * instantiation went wrong
+	 * @see File
+	 * @see FileOutputStream
+	 */
+	public void exportExcel (File file) throws IOException {
+		Workbook wb = new HSSFWorkbook();
+		String safeName = WorkbookUtil.createSafeSheetName("[Bilancio*?]");
+		Sheet bal = wb.createSheet(safeName);
+		TableModel model = getModel();
+		
+		Row heading = bal.createRow(0);
+		// Heading creation
+		for (int i = 0 ; i < model.getColumnCount() ; i++) {
+			Cell cell = heading.createCell(i);
+			cell.setCellValue(model.getColumnName(i));
 		}
-		fireTableDataChanged();
-	}
-	
-	@Override
-	public java.lang.Class<?> getColumnClass(int columnIndex) {
-		return String.class;
-	}
-	
-	/**
-	 * Notifies that the table has been edited and must be repainted<br>
-	 * The lblTotale will be updated with the sum of the visible rows in the table
-	 */
-	@Override
-	public void fireTableDataChanged() {
-		super.fireTableDataChanged();
-		// Updating total label
-		double tot = 0 ;
-		for (int i = 0 ; i < table.getRowCount(); i++)
-			tot += balance.get(table.convertRowIndexToModel(i)).getAmount();
-		if (Double.compare(tot, 0) >= 0)
-			lblTotale.setForeground(Color.BLACK);
-		else
-			lblTotale.setForeground(Color.RED);
-		DecimalFormat dFormat = new DecimalFormat("#.00");
-		lblTotale.setText(dFormat.format(tot));
-	}
-	
-	/**
-	 * @return Archive contained in the model
-	 */
-	public Archive<Voice> getData() {
-		return balance ;
-	}
-
-	@Override
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		Voice v = balance.get(rowIndex) ;
-		switch(columnIndex) {
-		case AMOUNT_COLUMN:
-			return v.amountToString() ;
-		case DATE_COLUMN:
-			return v.getDate().toString() ;
-		case DESC_COLUMN:
-			return v.getDescription() ;
-		default:
-			return null ;
-		}
-	}
-	
-	/**
-	 * Searches for occurrences and inserts their index in a vector
-	 * @param occurence String to search
-	 * @return A Vector containing the indexes of the found occurrences
-	 */
-	public Vector<Integer> searchOccurence(String occurence) {
-		Vector<Integer> indexes = new Vector<>();
-		int index = 0 ;
-		for (int i = 0 ; i < balance.size() ; i++){
-			if (getValueAt(i, AMOUNT_COLUMN).toString().contains(occurence)){
-				indexes.insertElementAt(i, index);
-				index++ ;
-			}
-			else if (getValueAt(i, DATE_COLUMN).toString().contains(occurence)) {
-				indexes.insertElementAt(i, index);
-				index++ ;
-			}
-			else if (getValueAt(i, DESC_COLUMN).toString().contains(occurence)) {
-				indexes.insertElementAt(i, index);
-				index++ ;
+		
+		// Table creation
+		for (int i = 0 ; i < getRowCount() ; i++) {
+			Row row = bal.createRow(i+1);
+			for (int j = 0 ; j < getColumnCount() ; j++) {
+				Cell cell = row.createCell(j);
+				cell.setCellValue(model.getValueAt(convertRowIndexToModel(i), j).toString());
 			}
 		}
-		return indexes ;
+		
+		// Writing on file
+		FileOutputStream stream = new FileOutputStream(file);
+		wb.write(stream);
+		stream.close();
+		wb.close();
 	}
 	
-	public java.lang.Class<?> getRowClass (int row) {
-		return balance.get(row).getClass();
+	/**
+	 * Exports the table in the .ods format.<br>
+	 * <a href="http://www.jopendocument.org/">JOpenDocument</a> libraries are used to 
+	 * export the table.
+	 *
+	 * @param file File to write
+	 * @throws FileNotFoundException Thrown is the file is not found
+	 * @throws IOException Thrown if an error occurs while writing the table on the file
+	 * @see File
+	 */
+	public void exportOOP(File file) throws FileNotFoundException, IOException {
+		TableModel model = getModel();
+		SpreadSheet.createEmpty(model).saveAs(file);
+	}
+	
+	/**
+	 * Exports the table in the CSV format.<br>
+	 * The CSV is a text file where every row represent his corresponding on the table
+	 * and each column is separated by the other using a comma ','.<br>
+	 * This format can be easily imported by a spreadsheet editor (for example: LibreOffice Calc,
+	 * Excel)
+	 * 
+	 * @param file File to write
+	 * @throws IOException If an error occurs while writing the file
+	 * @see File
+	 */
+	public void exportCSV(File file) throws IOException {
+		// Exporting the table using a comma as a column separator
+		exportText(file, ",");
+		
+		// Editing the MIME type to text/csv
+		UserDefinedFileAttributeView view = Files.getFileAttributeView(file.toPath(), 
+				UserDefinedFileAttributeView.class);
+		view.write("user.mimetype", Charset.defaultCharset().encode("text/csv"));
+	}
+	
+	/**
+	 * Exports the table as a text file separated by a separator string
+	 * 
+	 * @param file File to write
+	 * @param columnSeparator Separator string
+	 * @throws IOException If an error occurs writing the file
+	 * @see File
+	 */
+	public void exportText(File file, String columnSeparator) 
+			throws IOException {
+		TableModel model = getModel() ;
+		String lineSep = System.getProperty("line.separator");
+		int rows = model.getRowCount(),
+				columns = model.getColumnCount();
+		FileWriter writer = new FileWriter(file) ;
+		for (int i = 0 ; i < rows ; i++) {
+			for (int j = 0 ; j < columns ; j++) {
+				if (j == columns - 1)
+					writer.write(model.getValueAt(i, j).toString());
+				else
+					writer.write(model.getValueAt(i, j).toString() + columnSeparator);
+			}
+			writer.write(lineSep);
+		}
+		writer.close();
 	}
 }
