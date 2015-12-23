@@ -14,7 +14,7 @@ public class Revenue extends Voice implements Serializable {
 	/**
 	 * Class version
 	 */
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Instantiate a revenue

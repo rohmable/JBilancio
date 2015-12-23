@@ -15,7 +15,7 @@ public class StringDate extends Date {
 	/**
 	 * Class version
 	 */
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 1L;
 
 	/** SimpleDateFormatter to format the date as {@code dd/MM/yyyy}
 	 * @see SimpleDateFormat */

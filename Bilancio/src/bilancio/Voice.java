@@ -14,7 +14,7 @@ public abstract class Voice implements Serializable {
 	/**
 	 * Version of the class
 	 */
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 1L;
 	/**
 	 * Date of the voice
 	 */
@@ -49,7 +49,6 @@ public abstract class Voice implements Serializable {
 
 	/**
 	 * Sets the date of the voice
-	 * Modifica la data della voce
 	 * @param date New date
 	 */
 	public void setDate(StringDate date) {
@@ -74,7 +73,7 @@ public abstract class Voice implements Serializable {
 
 	/**
 	 * Sets the voice description
-	 * @param description New descrpition
+	 * @param description New description
 	 */
 	public void setDescription(String description) {
 		this.description = description;
@@ -100,5 +99,9 @@ public abstract class Voice implements Serializable {
 		Voice comp = (Voice)obj ;
 		return date.equals(comp.getDate()) && description.equals(comp.getDescription()) && 
 				(amount == comp.getAmount()) ;
+	}
+	
+	public String amountToString() {
+		return String.valueOf(amount);
 	}
 }

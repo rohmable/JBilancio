@@ -16,6 +16,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
@@ -105,6 +106,10 @@ public class SearchDialog extends JDialog implements ActionListener, DocumentLis
 				String search = textField.getText();
 				BalanceTableModel model = (BalanceTableModel)table.getModel();
 				occurences = model.searchOccurence(search);
+				if (occurences.size() == 0) {
+					JOptionPane.showMessageDialog(this, "Nessun risultato trovato", "Info", JOptionPane.INFORMATION_MESSAGE);
+					return ;
+				}
 			}
 			if (lastOccurence == occurences.size()) // Restart the research
 				lastOccurence = 0 ;

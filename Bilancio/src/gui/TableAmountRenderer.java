@@ -18,7 +18,7 @@ import bilancio.Revenue;
 public class TableAmountRenderer extends DefaultTableCellRenderer {
 	
 	/**
-	 * Versione of the table
+	 * Version of the table
 	 */
 	private static final long serialVersionUID = 1L;
 
@@ -32,7 +32,7 @@ public class TableAmountRenderer extends DefaultTableCellRenderer {
 		Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		BalanceTableModel model = (BalanceTableModel) table.getModel() ;
 		if (model.getData().get(row) instanceof Revenue)
-			c.setForeground(Color.GREEN);
+			c.setForeground(Color.BLACK);
 		else
 			c.setForeground(Color.RED);
 		return c;

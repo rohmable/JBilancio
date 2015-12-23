@@ -43,7 +43,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	/**
 	 * Table that displays balance voices
 	 */
-	private JTable table;
+	private BalanceTable table;
 	/**
 	 * Archive that contains balance voices
 	 */
@@ -52,6 +52,16 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * Table model associated to the table
 	 */
 	private BalanceTableModel tableModel ;
+	
+	/**
+	 * Default selection of the JComboBox
+	 */
+	private final int COMBO_BOX_DEFAULT = 3 ;
+	/**
+	 * Action commands
+	 */
+	private final String[] actionCommands = {"Aggiungi Voce", "Rimuovi Voce"} ;
+	private final int NEW_VOICE = 0, REMOVE_VOICE = 1 ;
 
 	/**
 	 * Builds the window
@@ -95,7 +105,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		// Inserting the table at the center of the main panel
 		JScrollPane scrollPane = new JScrollPane();
 		contentPane.add(scrollPane, BorderLayout.CENTER);
-		table = new JTable();
+		table = new BalanceTable();
 		scrollPane.setViewportView(table);
 		
 		// Building the panel that contains the amount
@@ -113,7 +123,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		table.setModel(tableModel);
 		table.setAutoCreateRowSorter(true);
 		// Setting the renderer and updating the table model
-		table.setDefaultRenderer(Double.class, new TableAmountRenderer());
+		table.setDefaultRenderer(String.class, new TableAmountRenderer());
 		tableModel.fireTableDataChanged();
 		
 		// Building the button panel
@@ -146,6 +156,8 @@ public class MainWindow extends JFrame implements ActionListener {
 		mntmTextFile.addActionListener(mActionListener);
 		mntmFileExcel.addActionListener(mActionListener);
 		mntmFileOds.addActionListener(mActionListener);
+		
+		comboBox.setSelectedIndex(COMBO_BOX_DEFAULT);
 	}
 	
 	/**
@@ -168,11 +180,11 @@ public class MainWindow extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String src = e.getActionCommand();
-		if (src.equals("Aggiungi Voce")) {
+		if (src.equals(actionCommands[NEW_VOICE])) {
 			AddVoice dialog = new AddVoice(this, "Aggiungi voce");
 			dialog.setVisible(true);
 		}
-		else {
+		else if (src.equals(actionCommands[REMOVE_VOICE])) {
 			int index = table.getSelectedRow() ;
 			if (index != -1) {
 				Object [] options = {"Si", "No"} ;

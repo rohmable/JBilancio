@@ -21,7 +21,7 @@ public class BalanceTableModel extends AbstractTableModel {
 	/**
 	 * Version of the class
 	 */
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 1L;
 	/**
 	 * Archive of the voices to display on the JTable
 	 */
@@ -39,6 +39,10 @@ public class BalanceTableModel extends AbstractTableModel {
 	 * Column names
 	 */
 	private final String[] columns = {"Ammontare", "Data", "Descrizione"} ;
+	/**
+	 * Columns indexes
+	 */
+	private final int AMOUNT_COLUMN = 0, DATE_COLUMN = 1, DESC_COLUMN = 2 ;
 	
 	/** 
 	 * Constructor of the BalanceTableModel
@@ -74,24 +78,25 @@ public class BalanceTableModel extends AbstractTableModel {
 	
 	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+		String newValue = (String)aValue; 
 		Voice v = balance.get(rowIndex) ;
 		switch (columnIndex) {
-		case 0:
-			Double newVal = (Double)aValue;
+		case AMOUNT_COLUMN:
+			Double newVal = Double.parseDouble(newValue);
 			if (Double.compare(newVal, 0) < 0)
 				return ;
 			else
-				v.setAmount((Double)aValue);
+				v.setAmount(Double.parseDouble(newValue));
 			break;
-		case 1:
+		case DATE_COLUMN:
 			try {
-				v.setDate((String) aValue);
+				v.setDate(newValue);
 			} catch (ParseException e) {
 				
 			}
 			break ;
-		case 2:
-			v.setDescription((String) aValue);
+		case DESC_COLUMN:
+			v.setDescription(newValue);
 			break ;
 		default:
 			break;
@@ -101,16 +106,7 @@ public class BalanceTableModel extends AbstractTableModel {
 	
 	@Override
 	public java.lang.Class<?> getColumnClass(int columnIndex) {
-		switch (columnIndex) {
-		case 0:
-			return Double.class ;
-		case 1:
-			return String.class ;
-		case 2:
-			return String.class;
-		default:
-			return Object.class;
-		}
+		return String.class;
 	}
 	
 	/**
@@ -120,11 +116,12 @@ public class BalanceTableModel extends AbstractTableModel {
 	@Override
 	public void fireTableDataChanged() {
 		super.fireTableDataChanged();
+		// Updating total label
 		double tot = 0 ;
 		for (int i = 0 ; i < table.getRowCount(); i++)
 			tot += balance.get(table.convertRowIndexToModel(i)).getAmount();
-		if (tot >= 0)
-			lblTotale.setForeground(Color.GREEN);
+		if (Double.compare(tot, 0) >= 0)
+			lblTotale.setForeground(Color.BLACK);
 		else
 			lblTotale.setForeground(Color.RED);
 		DecimalFormat dFormat = new DecimalFormat("#.00");
@@ -142,11 +139,11 @@ public class BalanceTableModel extends AbstractTableModel {
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		Voice v = balance.get(rowIndex) ;
 		switch(columnIndex) {
-		case 0:
-			return v.getAmount() ;
-		case 1:
+		case AMOUNT_COLUMN:
+			return v.amountToString() ;
+		case DATE_COLUMN:
 			return v.getDate().toString() ;
-		case 2:
+		case DESC_COLUMN:
 			return v.getDescription() ;
 		default:
 			return null ;
@@ -162,15 +159,15 @@ public class BalanceTableModel extends AbstractTableModel {
 		Vector<Integer> indexes = new Vector<>();
 		int index = 0 ;
 		for (int i = 0 ; i < balance.size() ; i++){
-			if (getValueAt(i, 0).toString().contains(occurence)){
+			if (getValueAt(i, AMOUNT_COLUMN).toString().contains(occurence)){
 				indexes.insertElementAt(i, index);
 				index++ ;
 			}
-			else if (getValueAt(i, 1).toString().contains(occurence)) {
+			else if (getValueAt(i, DATE_COLUMN).toString().contains(occurence)) {
 				indexes.insertElementAt(i, index);
 				index++ ;
 			}
-			else if (getValueAt(i, 2).toString().contains(occurence)) {
+			else if (getValueAt(i, DESC_COLUMN).toString().contains(occurence)) {
 				indexes.insertElementAt(i, index);
 				index++ ;
 			}

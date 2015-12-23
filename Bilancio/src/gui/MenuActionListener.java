@@ -16,7 +16,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Container;
 
 import bilancio.Archive;
-import bilancio.TableExporter;
 import bilancio.Voice;
 /**
  * Listener for the menu of the MainWindow, executes the action chosen by
@@ -26,13 +25,13 @@ import bilancio.Voice;
  */
 public class MenuActionListener implements ActionListener {
 	private Archive<Voice> balance ;
-	private JTable table ;
+	private BalanceTable table ;
 	
 	/**
 	 * @param balance Balance to work with
 	 * @param table Table to export
 	 */
-	public MenuActionListener(Archive<Voice> balance, JTable table) {
+	public MenuActionListener(Archive<Voice> balance, BalanceTable table) {
 		this.balance = balance ;
 		this.table = table ;
 	}
@@ -41,7 +40,6 @@ public class MenuActionListener implements ActionListener {
 	 * Function that shows a FileChooser to save the balance on a user's specified
 	 * file
 	 * @param parent Parent of the FileChooser
-	 * @see TableExporter
 	 */
 	private void saveFile(Container parent) {
 		FileChooser fChooser = new FileChooser();
@@ -95,11 +93,10 @@ public class MenuActionListener implements ActionListener {
 	/**
 	 * Exports the table in a CSV format
 	 * @param panel Parent for the FileChooser
-	 * @see TableExporter
 	 */
 	private void exportCSV(Container panel) {
 		FileChooser chooser = new FileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV file", ".csv") ;
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV file", "csv") ;
 		chooser.setFileFilter(filter);
 		chooser.setMultiSelectionEnabled(false);
 		int response = chooser.showSaveDialog(panel);
@@ -107,7 +104,7 @@ public class MenuActionListener implements ActionListener {
 			return ;
 		File selectedFile = chooser.getSelectedFile();
 		try {
-			TableExporter.exportCSV(table, selectedFile);
+			table.exportCSV(selectedFile);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(panel, "Impossibile esportare il file: " + e, 
 					"Errore", JOptionPane.ERROR_MESSAGE);
@@ -115,13 +112,12 @@ public class MenuActionListener implements ActionListener {
 	}
 	
 	/**
-	 * Exports the table in a text separted by spaces
+	 * Exports the table in a text separated by spaces
 	 * @param panel Parent for the FileChooser
-	 * @see TableExporter
 	 */
 	private void exportText(Container panel) {
 		FileChooser chooser = new FileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("File di testo", ".txt") ;
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("File di testo", "txt") ;
 		chooser.setFileFilter(filter);
 		chooser.setMultiSelectionEnabled(false);
 		int response = chooser.showSaveDialog(panel);
@@ -129,7 +125,7 @@ public class MenuActionListener implements ActionListener {
 			return ;
 		File selectedFile = chooser.getSelectedFile();
 		try {
-			TableExporter.exportText(table, selectedFile, " ");
+			table.exportText(selectedFile, " ");
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(panel, "Impossibile esportare il file: " + e, 
 					"Errore", JOptionPane.ERROR_MESSAGE);
@@ -139,11 +135,10 @@ public class MenuActionListener implements ActionListener {
 	/**
 	 * Exports the table in ODS format
 	 * @param panel Parent for the FileChooser
-	 * @see TableExporter
 	 */
 	private void exportLibreOffice(Container panel) {
 		FileChooser chooser = new FileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("File ODS", ".ods") ;
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("File ODS", "ods") ;
 		chooser.setFileFilter(filter);
 		chooser.setMultiSelectionEnabled(false);
 		int response = chooser.showSaveDialog(panel);
@@ -151,7 +146,7 @@ public class MenuActionListener implements ActionListener {
 			return ;
 		File selectedFile = chooser.getSelectedFile();
 		try {
-			TableExporter.exportOOP(table, selectedFile);
+			table.exportOOP(selectedFile);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(panel, "Impossibile esportare il file: " + e, 
 					"Errore", JOptionPane.ERROR_MESSAGE);
@@ -161,11 +156,10 @@ public class MenuActionListener implements ActionListener {
 	/**
 	 * Exports the table in Excel format
 	 * @param panel Parent fort the FileChooser
-	 * @see TableExporter
 	 */
 	private void exportExcel(Container panel) {
 		FileChooser chooser = new FileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("File Excel", ".xls") ;
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("File Excel", "xls") ;
 		chooser.setFileFilter(filter);
 		chooser.setMultiSelectionEnabled(false);
 		int response = chooser.showSaveDialog(panel);
@@ -173,7 +167,7 @@ public class MenuActionListener implements ActionListener {
 			return ;
 		File selectedFile = chooser.getSelectedFile();
 		try {
-			TableExporter.exportExcel(table, selectedFile);
+			table.exportExcel(selectedFile);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(panel, "Impossibile esportare il file: " + e, 
 					"Errore", JOptionPane.ERROR_MESSAGE);
